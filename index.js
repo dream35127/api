@@ -264,7 +264,9 @@ app.post('/line', (req, res) => {
       }, timestamp); 
     }
 });
-
+app.listen(4000, () => {
+  console.log("your server is running on port 4000");
+});
 module.exports = app
 
 
