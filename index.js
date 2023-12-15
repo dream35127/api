@@ -261,8 +261,8 @@ app.post('/line', (req, res) => {
       }, timestamp); 
     }
 });
-app.listen(4000, () => {
-  console.log("your server is running on port 4000");
+app.listen(3001, () => {
+  console.log("your server is running on port 3001");
 });
 export default app;
 
