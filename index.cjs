@@ -8,7 +8,6 @@ const axios = require('axios');
 const { config } = require('dotenv');;
 config({ path: `${__dirname}/.env` });
 const app = express();
-app.use(cors());
 app.use(express.json()); 
 
 const db = createConnection({
