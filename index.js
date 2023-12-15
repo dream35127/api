@@ -1,19 +1,18 @@
 import express, { json } from "express";
 import { createConnection } from "mysql";
 import cors from "cors";
-import path, { dirname } from "path";
-import { promises as fs } from 'fs';
-import { createRequire } from 'module';
-import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import speakeasy from 'speakeasy';
 import moment from 'moment-timezone';
 import axios from "axios";
+import { config } from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-require('dotenv').config();
+
+config({ path: `${__dirname}/.env` });
 const app = express();
 app.use(cors());
 app.use(json());
@@ -56,21 +55,7 @@ app.post("/project", (req, res) => {
     });
 });
 
-app.get('/api/downloadDocxFile/:fileName', (req, res) => {
-  const fileName = req.params.fileName;
-  const filePath = path.join(__dirname, 'tqfDOCX', fileName); // กำหนดเส้นทางไฟล์
 
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      console.error('Error reading file:', err);
-      res.status(500).json({ message: 'Error reading file' });
-    } else {
-      res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-      res.send(data);
-    }
-  });
-});
 
 app.get('/api/getTemplate', (req, res) => {
   const idTQF = req.query.idTQF; // รับชื่อเทมเพลตจากคำขอ
