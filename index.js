@@ -264,6 +264,6 @@ app.post('/line', (req, res) => {
 app.listen(4000, () => {
   console.log("your server is running on port 4000");
 });
-
+export default app;
 
 
