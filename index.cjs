@@ -9,7 +9,7 @@ const { config } = require('dotenv');;
 config({ path: `${__dirname}/.env` });
 const app = express();
 app.use(express.json()); 
-
+app.use(cors());
 const db = createConnection({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
