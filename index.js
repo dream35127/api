@@ -1,22 +1,19 @@
-import express, { json, response } from "express";
-const app = express();
+import express, { json } from "express";
 import { createConnection } from "mysql";
 import cors from "cors";
-import multer from "multer";
 import path from "path";
 import * as fs from 'node:fs';
 import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import speakeasy from 'speakeasy';
-import { error } from "console";
 import moment from 'moment-timezone';
 import axios from "axios";
 const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 require('dotenv').config()
-
+const app = express();
 app.use(cors());
 app.use(json());
 
@@ -267,6 +264,6 @@ app.post('/line', (req, res) => {
 app.listen(4000, () => {
   console.log("your server is running on port 4000");
 });
-module.exports = app
+
 
 
