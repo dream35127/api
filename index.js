@@ -1,18 +1,19 @@
 import express, { json } from "express";
 import { createConnection } from "mysql";
 import cors from "cors";
-import path from "path";
-import * as fs from 'node:fs';
+import path, { dirname } from "path";
+import { promises as fs } from 'fs';
 import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import speakeasy from 'speakeasy';
 import moment from 'moment-timezone';
 import axios from "axios";
+
 const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-require('dotenv').config()
+const __dirname = dirname(__filename);
+require('dotenv').config();
 const app = express();
 app.use(cors());
 app.use(json());
