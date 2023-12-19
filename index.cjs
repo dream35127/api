@@ -1,15 +1,17 @@
 const express = require('express');
 const { createConnection } = require('mysql');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const speakeasy = require('speakeasy');
 const moment = require('moment-timezone');
 const axios = require('axios');
 const { config } = require('dotenv');;
 config({ path: `${__dirname}/.env` });
 const app = express();
+const postmark = require('postmark');
+const client = new postmark.ServerClient(process.env.TOKEN_EMAIL);
 app.use(express.json()); 
 app.use(cors());
+
 const db = createConnection({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -119,14 +121,6 @@ app.post('/api/reset-date', (req, res) => {
   });
 });
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp-mail.outlook.com',
-  port: 587,
-  auth: {
-    user: process.env.MAIL_ID,
-    pass: process.env.MAIL_PASS
-  }
-});
 
 const userSecrets = [];
 app.post('/generate-otp', (req, res) => {
@@ -139,14 +133,14 @@ app.post('/generate-otp', (req, res) => {
 
   // ข้อความอีเมล
   const mailOptions = {
-    from: 'ระบบประกันคุณภาพ <ssru-engineer@hotmail.com>', // อีเมลของคุณ
+    from: 's62122519001@ssru.ac.th', // อีเมลของคุณ
     to: req.body.email, // อีเมลผู้รับ
     subject: 'การยืนยันตัวตนในระบบประกันคุณภาพ', // หัวข้ออีเมล
-    text: `เราขอยืนยันตัวตนของคุณในระบบประกันคุณภาพด้วยรหัส OTP ดังนี้: ${otp}\nกรุณาใส่รหัส OTP นี้ในแอปพลิเคชันของคุณเพื่อยืนยันตัวตน\n\nขอแสดงความนับถือ\nทีมงานระบบประกันคุณภาพ`, // เนื้อหาข้อความ
+    textBody: `เราขอยืนยันตัวตนของคุณในระบบประกันคุณภาพด้วยรหัส OTP ดังนี้: ${otp}\nกรุณาใส่รหัส OTP นี้ในแอปพลิเคชันของคุณเพื่อยืนยันตัวตน\n\nขอแสดงความนับถือ\nทีมงานระบบประกันคุณภาพ`, // เนื้อหาข้อความ
   };
 
   // ส่งอีเมล
-  transporter.sendMail(mailOptions, (error, info) => {
+  client.sendEmail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending email: ', error);
       res.status(500).json({ message: 'Error sending OTP email' });
@@ -185,10 +179,10 @@ app.post('/reset-otp', (req, res) => {
     from: 'ระบบประกันคุณภาพ <ssru-engineer@hotmail.com>', // อีเมลของคุณ
     to: req.body.email, // อีเมลผู้รับ
     subject: 'การยืนยันตัวตนในระบบประกันคุณภาพ', // หัวข้ออีเมล
-    text: `สวัสดีคุณ ${req.body.email},\n\nเราขอยืนยันตัวตนของคุณในระบบประกันคุณภาพด้วยรหัส OTP ดังนี้: ${otp}\nกรุณาใส่รหัส OTP นี้ในแอปพลิเคชันของคุณเพื่อยืนยันตัวตน\n\nขอแสดงความนับถือ,\nทีมงานระบบประกันคุณภาพ`, // เนื้อหาข้อความ
+    textBody: `สวัสดีคุณ ${req.body.email},\n\nเราขอยืนยันตัวตนของคุณในระบบประกันคุณภาพด้วยรหัส OTP ดังนี้: ${otp}\nกรุณาใส่รหัส OTP นี้ในแอปพลิเคชันของคุณเพื่อยืนยันตัวตน\n\nขอแสดงความนับถือ,\nทีมงานระบบประกันคุณภาพ`, // เนื้อหาข้อความ
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
+  client.sendEmail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending email: ', error);
       res.status(500).json({ message: 'Error sending OTP email' });
@@ -246,7 +240,9 @@ app.post('/line', (req, res) => {
       }, timestamp); 
     }
 });
-
+app.listen(3001, () => {
+  console.log("Yey, your server is running on port 3001");
+});
 module.exports = app;
 
 
