@@ -68,7 +68,7 @@ app.get('/api/getTemplate', (req, res) => {
     } else {
 
       const templateFile = results[0].template_file;
-      res.setHeader('Content-Disposition', `attachment; filename="template.docx"`);
+      res.setHeader('Content-Disposition', `inline; filename="template.docx"`);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       res.send(templateFile);
     }
@@ -176,7 +176,7 @@ app.post('/reset-otp', (req, res) => {
   });
 
   const mailOptions = {
-    from: 'ระบบประกันคุณภาพ <ssru-engineer@hotmail.com>', // อีเมลของคุณ
+    from: 's62122519001@ssru.ac.th', // อีเมลของคุณ
     to: req.body.email, // อีเมลผู้รับ
     subject: 'การยืนยันตัวตนในระบบประกันคุณภาพ', // หัวข้ออีเมล
     textBody: `สวัสดีคุณ ${req.body.email},\n\nเราขอยืนยันตัวตนของคุณในระบบประกันคุณภาพด้วยรหัส OTP ดังนี้: ${otp}\nกรุณาใส่รหัส OTP นี้ในแอปพลิเคชันของคุณเพื่อยืนยันตัวตน\n\nขอแสดงความนับถือ,\nทีมงานระบบประกันคุณภาพ`, // เนื้อหาข้อความ
