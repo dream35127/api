@@ -219,28 +219,30 @@ app.post('/line', (req, res) => {
   const timestamp1 = formattedDate - currentDate;
   const timestamp = timestamp1 - 86400000;
   console.log(timestamp)
-    if (timestamp < 86400000) {
-      res.status(200).json({ success: 'อัพเดตวันที่สำเร็จ' });
-      setTimeout(() => {
-        const token = process.env.TOKEN;
-        const message = `\nไกล้ครบกำหนดวันที่  ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`;
-        const url = 'https://notify-api.line.me/api/notify';
-        const data = {
-          message: message
-        };
-        const headers = {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        };
-        axios.post(url, new URLSearchParams(data), { headers })
-          .then(response => {
-            console.log('ส่งข้อความสำเร็จ!');
-          })
-          .catch(error => {
-            console.error('เกิดข้อผิดพลาดในการส่งข้อความ:', error);
-          });
-      }, timestamp); 
-    }
+  if (timestamp < 86400000) {
+    res.status(200).json({ success: 'อัพเดตวันที่สำเร็จ' });
+
+    setImmediate(() => {
+      const token = process.env.TOKEN;
+      const message = `\nไกล้ครบกำหนดวันที่  ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`;
+      const url = 'https://notify-api.line.me/api/notify';
+      const data = {
+        message: message
+      };
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      };
+      
+      axios.post(url, new URLSearchParams(data), { headers })
+        .then(response => {
+          console.log('success!');
+        })
+        .catch(error => {
+          console.error('error:', error);
+        });
+    });
+  }
 });
 app.listen(3001, () => {
   console.log("Yey, your server is running on port 3001");
