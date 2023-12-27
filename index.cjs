@@ -17,6 +17,7 @@ const db = createConnection({
   host: process.env.DB_HOST,
   password: process.env.DB_PASS,
   database: process.env.DB_DATABASE,
+  port: process.env.DB_PORT,
 });
 
 
