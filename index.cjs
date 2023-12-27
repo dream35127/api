@@ -210,39 +210,28 @@ app.post('/delete-otp', (req, res) => {
 });
 app.post('/line', (req, res) => {
   const formattedDate = moment.tz(req.body.dateTQF, 'Asia/Bangkok');
-  const currentDate = moment().tz('Asia/Bangkok');
   formattedDate.startOf('day'); // เริ่มเวลาที่ 00:00:00
-  currentDate.startOf('day');  // เริ่มเวลาที่ 00:00:00
   const deadline = formattedDate.format('YYYY-MM-DD');
   console.log(formattedDate)
-  console.log(currentDate)
-  const timestamp1 = formattedDate - currentDate;
-  const timestamp = timestamp1 - 86400000;
-  console.log(timestamp)
-  if (timestamp < 86400000) {
-    res.status(200).json({ success: 'อัพเดตวันที่สำเร็จ' });
+  const token = process.env.TOKEN;
+  const message = `\nครบกำหนดส่งวันที่  ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`;
+  const url = 'https://notify-api.line.me/api/notify';
+  const data = {
+    message: message
+  };
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/x-www-form-urlencoded'
+  };
 
-    setImmediate(() => {
-      const token = process.env.TOKEN;
-      const message = `\nไกล้ครบกำหนดวันที่  ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`;
-      const url = 'https://notify-api.line.me/api/notify';
-      const data = {
-        message: message
-      };
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      };
-      
-      axios.post(url, new URLSearchParams(data), { headers })
-        .then(response => {
-          console.log('success!');
-        })
-        .catch(error => {
-          console.error('error:', error);
-        });
+  axios.post(url, new URLSearchParams(data), { headers })
+    .then(response => {
+      console.log('success!');
+      res.status(200).json({ success: 'อัพเดตวันที่สำเร็จ' });
+    })
+    .catch(error => {
+      console.error('error:', error);
     });
-  }
 });
 app.listen(3001, () => {
   console.log("Yey, your server is running on port 3001");
