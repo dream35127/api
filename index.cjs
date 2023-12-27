@@ -210,7 +210,7 @@ app.post('/delete-otp', (req, res) => {
 });
 app.post('/line', (req, res) => {
   const formattedDate = moment.tz(req.body.dateTQF, 'Asia/Bangkok');
-  const currentDate = moment();
+  const currentDate = moment().tz('Asia/Bangkok');
   formattedDate.startOf('day'); // เริ่มเวลาที่ 00:00:00
   currentDate.startOf('day');  // เริ่มเวลาที่ 00:00:00
   const deadline = formattedDate.format('YYYY-MM-DD');
