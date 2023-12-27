@@ -216,7 +216,8 @@ app.post('/line', (req, res) => {
   const deadline = formattedDate.format('YYYY-MM-DD');
   console.log(formattedDate)
   console.log(currentDate)
-  const timestamp = formattedDate - currentDate;
+  const timestamp1 = formattedDate - currentDate;
+  const timestamp = timestamp1 - 86400000;
   console.log(timestamp)
     if (timestamp < 86400000) {
       res.status(200).json({ success: 'อัพเดตวันที่สำเร็จ' });
