@@ -76,11 +76,12 @@ app.get('/api/getTemplate', (req, res) => {
   });
 });
 app.post('/api/updateStatusTQF', (req, res) => {
-  const courseCode = req.body.courseCode; // รับ courseCode จากคำขอ POST
-  const query = `UPDATE tqf SET status_tqf = NOW() WHERE course_code = ?`;
+  const courseCode = req.body.courseCode; 
+  const number_tqf = req.body.number_tqf;
+  const query = `UPDATE tqf SET status_tqf = NOW() WHERE course_code = ? AND number_tqf = ?`;
 
   // Query อัพเดตค่า status_tqf
-  db.query(query, [courseCode], (error, results) => {
+  db.query(query, [courseCode, number_tqf],(error, results) => {
     if (error) {
       console.error('Error updating status_tqf:', error);
       res.status(500).json({ message: 'Error updating status_tqf' });
