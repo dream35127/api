@@ -234,6 +234,29 @@ app.post('/line', (req, res) => {
       console.error('error:', error);
     });
 });
+app.post('/nofity-email', (req, res) => {
+  const formattedDate = moment.tz(req.body.dateTQF, 'Asia/Bangkok');
+  formattedDate.startOf('day'); // เริ่มเวลาที่ 00:00:00
+  const deadline = formattedDate.format('YYYY-MM-DD');
+  // ข้อความอีเมล
+  const mailOptions = {
+    from: 's62122519001@ssru.ac.th', // อีเมลของคุณ
+    to: req.body.storedEmail, // อีเมลผู้รับ
+    subject: 'แจ้งเตือนระบบประกันคุณภาพ', // หัวข้ออีเมล
+    textBody: `ครบกำหนดส่งวันที่  ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`, // เนื้อหาข้อความ
+  };
+
+  // ส่งอีเมล
+  client.sendEmail(mailOptions, (error, info) => {
+    if (error) {
+      console.error('Error sending email: ', error);
+      res.status(500).json({ message: 'Error sending OTP email' });
+    } else {
+      console.log('Email sent: ', info.response);
+      res.json({ message: 'OTP sent successfully' });
+    }
+  });
+});
 app.listen(3001, () => {
   console.log("Yey, your server is running on port 3001");
 });
