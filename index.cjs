@@ -241,7 +241,7 @@ app.post('/nofity-email', (req, res) => {
   // ข้อความอีเมล
   const mailOptions = {
     from: 's62122519001@ssru.ac.th', // อีเมลของคุณ
-    to: req.body.storedEmail, // อีเมลผู้รับ
+    to: req.body.data2, // อีเมลผู้รับ
     subject: 'แจ้งเตือนระบบประกันคุณภาพ', // หัวข้ออีเมล
     textBody: `ครบกำหนดส่งวันที่  ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`, // เนื้อหาข้อความ
   };
