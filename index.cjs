@@ -257,6 +257,19 @@ app.post('/nofity-email', (req, res) => {
     }
   });
 });
+app.post('/api/input-USER', (req, res) => {
+  const email = req.body.mail;
+  const password = req.body.pass;
+  const sql = 'INSERT INTO login (email, password) VALUES (?, ?)';
+  db.query(sql, [email, password], (err, result) => {
+    if (err) {
+      console.error('MySQL Insert Error:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } else {
+      res.status(201).json({ message: 'User inserted successfully', userId: result.insertId });
+    }
+  });
+});
 app.listen(3001, () => {
   console.log("Yey, your server is running on port 3001");
 });
