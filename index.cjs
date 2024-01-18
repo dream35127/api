@@ -9,7 +9,8 @@ config({ path: `${__dirname}/.env` });
 const app = express();
 const postmark = require('postmark');
 const client = new postmark.ServerClient(process.env.TOKEN_EMAIL);
-app.use(express.json()); 
+const multer = require('multer');
+app.use(express.json());
 app.use(cors());
 
 const db = createConnection({
@@ -17,9 +18,9 @@ const db = createConnection({
   host: process.env.DB_HOST,
   password: process.env.DB_PASS,
   database: process.env.DB_DATABASE,
-  port: process.env.DB_PORT,
 });
-
+const storage = multer.memoryStorage(); // ให้ Multer เก็บไฟล์ใน memory
+const upload = multer({ storage: storage });
 
 app.get('/api/data', (req, res) => {
   const sql = 'SELECT * FROM tqf';
@@ -32,6 +33,7 @@ app.get('/api/data', (req, res) => {
     res.json(result);
   });
 });
+
 db.connect((err) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
@@ -39,6 +41,7 @@ db.connect((err) => {
   }
   console.log('Connected to MySQL Database!');
 });
+
 app.post("/project", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -75,13 +78,14 @@ app.get('/api/getTemplate', (req, res) => {
     }
   });
 });
+
 app.post('/api/updateStatusTQF', (req, res) => {
-  const courseCode = req.body.courseCode; 
+  const courseCode = req.body.courseCode;
   const number_tqf = req.body.number_tqf;
   const query = `UPDATE tqf SET status_tqf = NOW() WHERE course_code = ? AND number_tqf = ?`;
 
   // Query อัพเดตค่า status_tqf
-  db.query(query, [courseCode, number_tqf],(error, results) => {
+  db.query(query, [courseCode, number_tqf], (error, results) => {
     if (error) {
       console.error('Error updating status_tqf:', error);
       res.status(500).json({ message: 'Error updating status_tqf' });
@@ -194,6 +198,7 @@ app.post('/reset-otp', (req, res) => {
     }
   });
 });
+
 app.delete('/delete-secret/:email', (req, res) => {
   const userEmailToRetrieve = req.params.email;
 
@@ -206,9 +211,11 @@ app.delete('/delete-secret/:email', (req, res) => {
     res.status(404).json({ message: 'User OTP secret not found' });
   }
 });
+
 app.post('/delete-otp', (req, res) => {
   delete userSecrets[userEmailToRetrieve];
 });
+
 app.post('/line', (req, res) => {
   const formattedDate = moment.tz(req.body.dateTQF, 'Asia/Bangkok');
   formattedDate.startOf('day'); // เริ่มเวลาที่ 00:00:00
@@ -234,6 +241,7 @@ app.post('/line', (req, res) => {
       console.error('error:', error);
     });
 });
+
 app.post('/nofity-email', (req, res) => {
   const formattedDate = moment.tz(req.body.dateTQF, 'Asia/Bangkok');
   formattedDate.startOf('day'); // เริ่มเวลาที่ 00:00:00
@@ -242,7 +250,7 @@ app.post('/nofity-email', (req, res) => {
   const mailOptions = {
     from: 's62122519001@ssru.ac.th', // อีเมลของคุณ
     to: req.body.data2, // อีเมลผู้รับ
-    subject: 'แจ้งเตือนระบบประกันคุณภาพ', // หัวข้ออีเมล
+    subject: 'การยืนยันตัวตนในระบบประกันคุณภาพ', // หัวข้ออีเมล
     textBody: `ครบกำหนดส่งวันที่  ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`, // เนื้อหาข้อความ
   };
 
@@ -267,6 +275,72 @@ app.post('/api/input-USER', (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     } else {
       res.status(201).json({ message: 'User inserted successfully', userId: result.insertId });
+    }
+  });
+});
+app.post('/upload/45Sfcc78SF-p77Zxc', upload.single('docxFile'), (req, res) => {
+  const file_name = req.file.buffer; // ข้อมูลไฟล์ในรูปแบบ binary
+  const id_TQF = req.body.id_TQF;
+  const upload_status = 'อัพโหลดแล้ว';
+  // ทำการบันทึก file ลงใน MySQL
+  const query1 = 'INSERT INTO tqf (id_TQF,file_name) VALUES (?, ?) ON DUPLICATE KEY UPDATE file_name = VALUES(file_name);';
+  const sql1 = 'UPDATE tqf SET upload_status = ? WHERE id_TQF = ?';
+  db.query(sql1, [upload_status, id_TQF], (err, result) => {
+    if (err) {
+      console.error('Error inserting file into database:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+    db.query(query1, [id_TQF, file_name], (err, result) => {
+      if (err) {
+        console.error('Error inserting file into database:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+        return;
+      }
+
+      res.json({ message: 'File uploaded successfully!' });
+    });
+  });
+});
+app.post('/reset_file/45514AcxzOiuT-4778', (req, res) => {
+  const id_TQF = req.body.id_TQF;
+  const upload_status = 'ยังไม่อัพโหลด';
+  const sql = 'UPDATE tqf SET file_name = NULL WHERE id_TQF = ?';
+  const sql1 = 'UPDATE tqf SET upload_status = ? WHERE id_TQF = ?';
+
+  // ทำการ Update ข้อมูล
+  db.query(sql1, [upload_status, id_TQF], (err, result) => {
+    if (err) {
+      console.error('Error updating upload status in database:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    // หาก Update สำเร็จ จะทำการ Update file_name และส่ง response กลับไปที่ client
+    db.query(sql, [id_TQF], (err, result) => {
+      if (err) {
+        console.error('Error updating file_name in database:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+        return;
+      }
+
+      res.json({ message: 'File reset successfully!' });
+    });
+  });
+});
+app.get('/api/getTQF', (req, res) => {
+  const id_TQF = req.query.idTQF;
+  const query = 'SELECT file_name FROM tqf WHERE id_TQF = ?';
+  db.query(query, [id_TQF], (error, results) => {
+    if (error) {
+      console.error('Error fetching template from database:', error);
+      res.status(500).json({ message: 'Error fetching template from database' });
+    } else {
+
+      const templateFile = results[0].file_name;
+      res.setHeader('Content-Disposition', `attachment; filename="template.docx"`);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.send(templateFile);
     }
   });
 });
