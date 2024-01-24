@@ -250,7 +250,7 @@ app.post('/nofity-email', (req, res) => {
   const mailOptions = {
     from: 's62122519001@ssru.ac.th', // อีเมลของคุณ
     to: req.body.data2, // อีเมลผู้รับ
-    subject: 'การยืนยันตัวตนในระบบประกันคุณภาพ', // หัวข้ออีเมล
+    subject: 'การแจ้งเตือนในระบบประกันคุณภาพ', // หัวข้ออีเมล
     textBody: `ครบกำหนดส่งวันที่  ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`, // เนื้อหาข้อความ
   };
 
@@ -341,6 +341,23 @@ app.get('/api/getTQF', (req, res) => {
       res.setHeader('Content-Disposition', `attachment; filename="template.docx"`);
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       res.send(templateFile);
+    }
+  });
+});
+app.post('/api/delete-USER/485Az44A-874cvB', (req, res) => {
+  const emailToDelete = req.body.deletemail;
+  const sqlDelete = 'DELETE FROM login WHERE email = ?';
+
+  db.query(sqlDelete, [emailToDelete], (err, result) => {
+    if (err) {
+      console.error('MySQL Delete Error:', err);
+      res.status(500).json({ error: 'ข้อผิดพลาดภายในเซิร์ฟเวอร์' });
+    } else {
+      if (result.affectedRows > 0) {
+        res.status(200).json({ message: 'ลบผู้ใช้เรียบร้อยแล้ว' });
+      } else {
+        res.status(404).json({ error: 'ไม่พบผู้ใช้' });
+      }
     }
   });
 });
