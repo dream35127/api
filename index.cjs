@@ -219,7 +219,7 @@ app.post('/delete-otp', (req, res) => {
 app.post('/line', (req, res) => {
   const formattedDate = moment.tz(req.body.dateTQF, 'Asia/Bangkok');
   formattedDate.startOf('day'); // เริ่มเวลาที่ 00:00:00
-  const deadline = formattedDate.format('YYYY-MM-DD');
+  const deadline = formattedDate.format('DD-MM-YYYY');
   console.log(formattedDate)
   const token = process.env.TOKEN;
   const message = `\nครบกำหนดส่งวันที่  ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`;
@@ -245,7 +245,7 @@ app.post('/line', (req, res) => {
 app.post('/nofity-email', (req, res) => {
   const formattedDate = moment.tz(req.body.dateTQF, 'Asia/Bangkok');
   formattedDate.startOf('day'); // เริ่มเวลาที่ 00:00:00
-  const deadline = formattedDate.format('YYYY-MM-DD');
+  const deadline = formattedDate.format('DD-MM-YYYY');
   // ข้อความอีเมล
   const mailOptions = {
     from: 's62122519001@ssru.ac.th', // อีเมลของคุณ
@@ -360,6 +360,53 @@ app.post('/api/delete-USER/485Az44A-874cvB', (req, res) => {
       }
     }
   });
+});
+app.post('/notify-email1', async (req, res) => {
+  try {
+    // ถ้าคุณได้เชื่อมต่อ MySQL แล้ว และ 'connection' เป็นอ็อบเจ็กต์การเชื่อมต่อ MySQL
+    const queryResult = await new Promise((resolve, reject) => {
+      const query = 'SELECT email FROM login'; // แทนที่ 'your_table_name' ด้วยชื่อตารางจริง
+      db.query(query, (error, results) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+
+    // วนลูปผลลัพธ์และส่งอีเมล
+    for (const result of queryResult) {
+      const formattedDate = moment.tz(req.body.dateTQF, 'Asia/Bangkok');
+      formattedDate.startOf('day');
+      const deadline = formattedDate.format('DD-MM-YYYY');
+
+      const mailOptions = {
+        from: 's62122519001@ssru.ac.th',
+        to: result.email, // ใช้ที่อยู่อีเมลจากฐานข้อมูล
+        subject: 'การแจ้งเตือนในระบบประกันคุณภาพ',
+        textBody: `ครบกำหนดส่งวันที่ ${deadline}\nอย่าลืมส่งเอกสารมคอ.นะครับ!`,
+      };
+
+      // ส่งอีเมล
+      await new Promise((resolve, reject) => {
+        client.sendEmail(mailOptions, (error, info) => {
+          if (error) {
+            console.error('Error sending email: ', error);
+            reject(error);
+          } else {
+            console.log('Email sent: ', info.response);
+            resolve();
+          }
+        });
+      });
+    }
+
+    res.json({ message: 'ส่งอีเมลเรียบร้อยแล้ว' });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการส่งอีเมล' });
+  }
 });
 app.listen(3001, () => {
   console.log("Yey, your server is running on port 3001");
