@@ -330,17 +330,35 @@ app.post('/reset_file/45514AcxzOiuT-4778', (req, res) => {
 });
 app.get('/api/getTQF', (req, res) => {
   const id_TQF = req.query.idTQF;
-  const query = 'SELECT file_name FROM tqf WHERE id_TQF = ?';
-  db.query(query, [id_TQF], (error, results) => {
-    if (error) {
-      console.error('Error fetching template from database:', error);
-      res.status(500).json({ message: 'Error fetching template from database' });
-    } else {
+  const queryUploadStatus = 'SELECT upload_status FROM tqf WHERE id_TQF = ?';
+  const queryFile = 'SELECT file_name FROM tqf WHERE id_TQF = ?';
 
-      const templateFile = results[0].file_name;
-      res.setHeader('Content-Disposition', `attachment; filename="template.docx"`);
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-      res.send(templateFile);
+  db.query(queryUploadStatus, [id_TQF], (err, resultUploadStatus) => {
+    if (err) {
+      console.error('Error in database:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    } else {
+      const uploadStatus = resultUploadStatus[0].upload_status;
+
+      // Check if upload_status meets your condition
+      if (uploadStatus !== 'ยังไม่อัพโหลด') {
+        // Continue with the second query to get file_name
+        db.query(queryFile, [id_TQF], (error, results) => {
+          if (error) {
+            console.error('Error fetching template from database:', error);
+            res.status(500).json({ message: 'Error fetching template from database' });
+          } else {
+            const templateFile = results[0].file_name;
+            res.setHeader('Content-Disposition', `attachment; filename="template.docx"`);
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            res.send(templateFile);
+          }
+        });
+      } else {
+        // If upload_status doesn't meet the condition, send a response accordingly
+        res.status(403).json({ message: 'Access denied. Upload status does not match the required condition.' });
+      }
     }
   });
 });
