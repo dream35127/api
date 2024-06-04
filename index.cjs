@@ -11,7 +11,9 @@ const postmark = require('postmark');
 const client = new postmark.ServerClient(process.env.TOKEN_EMAIL);
 const multer = require('multer');
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'https://ce-tqf-beta.vercel.app'
+}));
 
 const db = createConnection({
   user: process.env.DB_USER,
